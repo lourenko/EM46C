@@ -1,0 +1,103 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  dev
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../constant/globalVariables"
+
+scale 1.0;
+
+// 1. Define base variables
+Lx      $L;
+Ly      #calc "$H / 2.0";
+Lz      0.005;
+
+// 2. Perform assignments with mathematical operations
+Nx      #calc "int(round($Lx * 32))";
+Ny      #calc "int(round($Nx * (1.6 * $Ly / $Lx)))"; // Computes Ny dynamically to keep cells square
+Nz      1;
+
+Xmin    0.0;
+Xmax    $Lx;
+Ymin    0.0; // #calc "-$Ly / 2.0";               // Centering the mesh on the Y-axis
+Ymax    $Ly;
+
+vertices
+(
+    ($Xmin $Ymin 0)                       // Vertex 0
+    ($Xmax $Ymin 0)                       // Vertex 1
+    ($Xmax $Ymax 0)                       // Vertex 2
+    ($Xmin $Ymax 0)                       // Vertex 3
+    ($Xmin $Ymin $Lz)                     // Vertex 4
+    ($Xmax $Ymin $Lz)                     // Vertex 5
+    ($Xmax $Ymax $Lz)                     // Vertex 6
+    ($Xmin $Ymax $Lz)                     // Vertex 7
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) ($Nx $Ny $Nz) simpleGrading (1 4 1)
+);
+
+boundary
+(
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 3 7 4)
+        );
+    }
+
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (1 2 6 5)
+        );
+    }
+
+    walls
+    {
+        type wall;
+        faces
+        (
+            (0 1 5 4)
+        );
+    }
+
+    centreline
+    {
+        type symmetryPlane;
+        faces
+        (
+            (2 3 7 6)
+        );
+    }
+
+    frontAndBack
+    {
+        type empty;
+        faces
+        (
+            (0 1 2 3)
+            (4 5 6 7)
+        );
+    }
+);
+
+
+// ************************************************************************* //
