@@ -22,9 +22,9 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         12;
+endTime         30;       // [segundos]
 
-deltaT          1e-3;
+deltaT          1.5e-2;   // [segundos]
 
 writeControl    runTime;
 
